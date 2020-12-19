@@ -9,4 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="color_for_action_bar">#FFFFFFFF</color>
     <color name="color_for_btn_go">#F40000</color>
+    <color name="grey_color_for_button_hor_scroll">#F1F4F9</color>
+    <color name="grey_color_for_background">#FAFAFA</color>
+    <color name="red_color_for_btn_sale">#F40000</color>
+    <color name="color_for_old_price">#CED2D9</color>
 </resources>

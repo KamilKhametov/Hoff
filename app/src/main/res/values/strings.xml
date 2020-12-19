@@ -3,4 +3,16 @@
     <string name="action_title">Главная</string>
     <string name="btn_go_text">Перейти в каталог</string>
     <string name="catalog_activity_title">Угловые диваны</string>
+
+    <string name="text_for_filter">Фильтры (12)</string>
+    <string name="btn_hor_one">Угловые тканевые</string>
+    <string name="btn_hor_two">Прямые кожанные</string>
+    <string name="btn_hor_three">Угловые кожанные</string>
+
+    <string-array name="products">
+        <item>Сначала дешевые</item>
+        <item>Сначала дорогие</item>
+        <item>Популярные товары</item>
+        <item>По скидкам</item>
+    </string-array>
 </resources>
