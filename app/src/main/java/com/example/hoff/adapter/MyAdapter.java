@@ -78,10 +78,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                     .load ( imageUrl )
                     .into ( imageProduct );
 
-            // Price new and old set
-//            newPriceProduct.setText ( myModel.getPrices ().getNew () );
-//            oldPriceProduct.setText ( myModel.getPrices ().getOld () );
-
             // Title set
             titleProduct.setText ( product.getName ());
 

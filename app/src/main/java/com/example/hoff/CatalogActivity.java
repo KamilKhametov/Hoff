@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Spinner;
 
@@ -14,9 +15,15 @@ import com.example.hoff.retrofit.APIConfig;
 import com.example.hoff.retrofit.APIService;
 import com.example.hoff.retrofit.APIServiceConstructor;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CatalogActivity extends AppCompatActivity {
 
@@ -24,6 +31,7 @@ public class CatalogActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager= new GridLayoutManager ( this, 2 );;
     MyAdapter myAdapter;
     Spinner spinnerProducts;
+    APIService apiService;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -33,55 +41,53 @@ public class CatalogActivity extends AppCompatActivity {
         // Установка кастомного actionBar (Каталог-активити)
         setActionBarTitleCatalog ();
 
-
+        // spinner find
         spinnerProducts=findViewById ( R.id.spinnerProducts );
 
-        // Работа с RecyclerView и Retrofit
+        // Устанвка RecyclerView и получение Retrofit constructor
+        Retrofit retrofit = APIServiceConstructor.getInstance ();
+        apiService = retrofit.create ( APIService.class );
+
         recyclerView = findViewById ( R.id.recyclerView );
+        recyclerView.setLayoutManager ( layoutManager );
+        recyclerView.setHasFixedSize ( true );
 
-        // Заполнение ключей и значений в HashMap
-//        Map<String, String> data = new HashMap<> ();
-//        data.put ( "category_id", String.valueOf ( APIConfig.category_id ));
-//        data.put ( "sort_by", APIConfig.sort_by );
-//        data.put ( "sort_type", APIConfig.sort_type );
-//        data.put ( "limit", String.valueOf ( APIConfig.limit ) );
-//        data.put ( "offset", String.valueOf ( APIConfig.offset ) );
-//        data.put ( "device_id", APIConfig.device_id );
-//        data.put ( "isAndroid", APIConfig.isAndroid );
-//        data.put ( "app_version", APIConfig.app_version );
-//        data.put ( "location", String.valueOf ( APIConfig.location ) );
-//        data.put ( "xhoff", APIConfig.xHoff );
+        // Получение данных с API и их отображение
+        fetchData ();
 
-        // Создание сервиса и асинронного запроса
-        APIService apiService=APIServiceConstructor.CreateService ( APIService.class );
-        Call<ProductResponse> call=apiService.getProducts ( APIConfig.category_id,
-                                                            APIConfig.sort_by,
-                                                            APIConfig.sort_type,
-                                                            APIConfig.limit,
-                                                            APIConfig.offset,
-                                                            APIConfig.device_id,
-                                                            APIConfig.isAndroid,
-                                                            APIConfig.app_version,
-                                                            APIConfig.location);
-        call.enqueue ( new Callback<ProductResponse> () {
-            @Override
-            public void onResponse( Call<ProductResponse> call, Response<ProductResponse> response ) {
-                if(response.isSuccessful ()){
-                    ProductResponse model = response.body ();
+    }
 
-                    myAdapter = new MyAdapter ( model.items );
-                    recyclerView.setLayoutManager ( layoutManager );
-                    recyclerView.setHasFixedSize ( true );
-                    recyclerView.setAdapter ( myAdapter );
-                }
-            }
+    @SuppressLint("CheckResult")
+    private void fetchData() {
+        // Запрос выполняется в IO потоке, а результат показывается в UI потоке
+        apiService.getProducts ( APIConfig.category_id,
+                                 APIConfig.sort_by,
+                                 APIConfig.sort_type,
+                                 APIConfig.limit,
+                                 APIConfig.offset,
+                                 APIConfig.device_id,
+                                 APIConfig.isAndroid,
+                                 APIConfig.app_version,
+                                 APIConfig.location )
+                .subscribeOn ( Schedulers.io() )
+                .observeOn ( AndroidSchedulers.mainThread () )
+                .subscribe ( new DisposableSingleObserver<ProductResponse> () {
+                    @Override
+                    public void onSuccess( @NonNull ProductResponse productResponse ) {
+                        // Установка полученных данных, если запрос совершен успешно
+                        displayData ( productResponse );
+                    }
 
-            @Override
-            public void onFailure( Call<ProductResponse> call, Throwable t ) {
+                    @Override
+                    public void onError( @NonNull Throwable e ) {
+                        // Если вдруг будет ошибка...
+                    }
+                } );
+    }
 
-            }
-        } );
-
+    private void displayData( ProductResponse responses) {
+        myAdapter = new MyAdapter ( responses.items );
+        recyclerView.setAdapter(myAdapter);
     }
 
     private void setActionBarTitleCatalog(){
