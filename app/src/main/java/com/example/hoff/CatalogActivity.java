@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.example.hoff.adapter.MyAdapter;
@@ -25,10 +28,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     RecyclerView recyclerView;
-    RecyclerView.LayoutManager layoutManager= new GridLayoutManager ( this, 2 );;
+    RecyclerView.LayoutManager layoutManager=new GridLayoutManager ( this, 2 );
+    ;
     MyAdapter myAdapter;
     Spinner spinnerProducts;
     APIService apiService;
@@ -45,37 +49,43 @@ public class CatalogActivity extends AppCompatActivity {
         spinnerProducts=findViewById ( R.id.spinnerProducts );
 
         // Устанвка RecyclerView и получение Retrofit constructor
-        Retrofit retrofit = APIServiceConstructor.getInstance ();
-        apiService = retrofit.create ( APIService.class );
+        Retrofit retrofit=APIServiceConstructor.getInstance ();
+        apiService=retrofit.create ( APIService.class );
 
-        recyclerView = findViewById ( R.id.recyclerView );
+        recyclerView=findViewById ( R.id.recyclerView );
         recyclerView.setLayoutManager ( layoutManager );
         recyclerView.setHasFixedSize ( true );
 
-        // Получение данных с API и их отображение
-        fetchData ();
+        // Spinner
+        ArrayAdapter<CharSequence> spinnerAdapter=ArrayAdapter.createFromResource ( this, R.array.products, android.R.layout.simple_spinner_item );
+        spinnerAdapter.setDropDownViewResource ( android.R.layout.simple_spinner_dropdown_item );
+        spinnerProducts.setAdapter ( spinnerAdapter );
+        spinnerProducts.setOnItemSelectedListener ( this );
 
     }
 
+    // Сортировка товаров
+    // Дешевые товары
     @SuppressLint("CheckResult")
-    private void fetchData() {
+    private void fetchDataDesc() {
         // Запрос выполняется в IO потоке, а результат показывается в UI потоке
         apiService.getProducts ( APIConfig.category_id,
-                                 APIConfig.sort_by,
-                                 APIConfig.sort_type,
+                                 "price",
+                                 "asc",
                                  APIConfig.limit,
                                  APIConfig.offset,
                                  APIConfig.device_id,
                                  APIConfig.isAndroid,
                                  APIConfig.app_version,
                                  APIConfig.location )
-                .subscribeOn ( Schedulers.io() )
+                .subscribeOn ( Schedulers.io () )
                 .observeOn ( AndroidSchedulers.mainThread () )
                 .subscribe ( new DisposableSingleObserver<ProductResponse> () {
                     @Override
                     public void onSuccess( @NonNull ProductResponse productResponse ) {
                         // Установка полученных данных, если запрос совершен успешно
                         displayData ( productResponse );
+
                     }
 
                     @Override
@@ -85,12 +95,126 @@ public class CatalogActivity extends AppCompatActivity {
                 } );
     }
 
-    private void displayData( ProductResponse responses) {
-        myAdapter = new MyAdapter ( responses.items );
-        recyclerView.setAdapter(myAdapter);
+
+    // Дорогие товары
+    @SuppressLint("CheckResult")
+    private void fetchDataAsc() {
+        // Запрос выполняется в IO потоке, а результат показывается в UI потоке
+        apiService.getProducts ( APIConfig.category_id,
+                                 "price",
+                                 "desc",
+                                 APIConfig.limit,
+                                 APIConfig.offset,
+                                 APIConfig.device_id,
+                                 APIConfig.isAndroid,
+                                 APIConfig.app_version,
+                                 APIConfig.location )
+                .subscribeOn ( Schedulers.io () )
+                .observeOn ( AndroidSchedulers.mainThread () )
+                .subscribe ( new DisposableSingleObserver<ProductResponse> () {
+                    @Override
+                    public void onSuccess( @NonNull ProductResponse productResponse ) {
+                        // Установка полученных данных, если запрос совершен успешно
+                        displayData ( productResponse );
+
+                    }
+
+                    @Override
+                    public void onError( @NonNull Throwable e ) {
+                        // Если вдруг будет ошибка...
+                    }
+                } );
     }
 
-    private void setActionBarTitleCatalog(){
+
+    // Популярные товары
+    @SuppressLint("CheckResult")
+    private void fetchDataPopular() {
+        // Запрос выполняется в IO потоке, а результат показывается в UI потоке
+        apiService.getProducts ( APIConfig.category_id,
+                                 APIConfig.sort_by, // popular
+                                 APIConfig.sort_type,
+                                 APIConfig.limit,
+                                 APIConfig.offset,
+                                 APIConfig.device_id,
+                                 APIConfig.isAndroid,
+                                 APIConfig.app_version,
+                                 APIConfig.location )
+                .subscribeOn ( Schedulers.io () )
+                .observeOn ( AndroidSchedulers.mainThread () )
+                .subscribe ( new DisposableSingleObserver<ProductResponse> () {
+                    @Override
+                    public void onSuccess( @NonNull ProductResponse productResponse ) {
+                        // Установка полученных данных, если запрос совершен успешно
+                        displayData ( productResponse );
+
+                    }
+
+                    @Override
+                    public void onError( @NonNull Throwable e ) {
+                        // Если вдруг будет ошибка...
+                    }
+                } );
+    }
+
+
+    // Товары по скидкам
+    @SuppressLint("CheckResult")
+    private void fetchDataDiscount() {
+        // Запрос выполняется в IO потоке, а результат показывается в UI потоке
+        apiService.getProducts ( APIConfig.category_id,
+                                 "discount",
+                                 APIConfig.sort_type,
+                                 APIConfig.limit,
+                                 APIConfig.offset,
+                                 APIConfig.device_id,
+                                 APIConfig.isAndroid,
+                                 APIConfig.app_version,
+                                 APIConfig.location )
+                .subscribeOn ( Schedulers.io () )
+                .observeOn ( AndroidSchedulers.mainThread () )
+                .subscribe ( new DisposableSingleObserver<ProductResponse> () {
+                    @Override
+                    public void onSuccess( @NonNull ProductResponse productResponse ) {
+                        // Установка полученных данных, если запрос совершен успешно
+                        displayData ( productResponse );
+
+                    }
+
+                    @Override
+                    public void onError( @NonNull Throwable e ) {
+                        // Если вдруг будет ошибка...
+                    }
+                } );
+    }
+
+    // Привязка данных
+    private void displayData( ProductResponse responses ) {
+        myAdapter=new MyAdapter ( responses.items );
+        recyclerView.setAdapter ( myAdapter );
+    }
+
+    //     Клик на item`ы спиннера
+    @Override
+    public void onItemSelected( AdapterView<?> parent, View view, int position, long id ) {
+        String itemPosition=parent.getItemAtPosition ( position ).toString ();
+        if (itemPosition.equals ( "Сначала дешевые" )) {
+            fetchDataDesc ();
+        } else if (itemPosition.equals ( "Сначала дорогие" )) {
+            fetchDataAsc ();
+        } else if (itemPosition.equals ( "Популярные товары" )) {
+            fetchDataPopular ();
+        } else if (itemPosition.equals ( "По скидкам" )) {
+            fetchDataDiscount ();
+        }
+    }
+
+    @Override
+    public void onNothingSelected( AdapterView<?> parent ) {
+
+    }
+
+    private void setActionBarTitleCatalog() {
         getSupportActionBar ().setDisplayOptions ( ActionBar.DISPLAY_SHOW_CUSTOM );
         getSupportActionBar ().setCustomView ( R.layout.action_bar_catalog );
         getSupportActionBar ().setHomeAsUpIndicator ( R.drawable.ic_line_back );

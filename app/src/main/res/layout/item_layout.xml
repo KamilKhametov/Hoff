@@ -22,7 +22,7 @@
             android:id="@+id/newPriceProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="210dp"
             android:text="TextView"
             android:textColor="#000000"
@@ -43,8 +43,9 @@
             android:id="@+id/statusProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="280dp"
+            android:layout_below="@+id/titleProduct"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
             android:paddingTop="5dp"
             android:text="TextView" />
 
@@ -61,8 +62,9 @@
             android:id="@+id/oldPriceProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="90dp"
+            android:layout_marginStart="6dp"
             android:layout_marginTop="210dp"
+            android:layout_toEndOf="@+id/newPriceProduct"
             android:text="TextView"
             android:textColor="@color/color_for_old_price" />
 
@@ -70,7 +72,7 @@
             android:id="@+id/titleProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="235dp"
             android:text="TextView"
             android:textColor="#000000" />
@@ -80,8 +82,9 @@
             style="@style/Widget.AppCompat.RatingBar.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="19dp"
-            android:layout_marginTop="320dp"
+            android:layout_below="@+id/statusProduct"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="10dp"
             android:theme="@style/RatingBar" />
@@ -90,8 +93,9 @@
             android:id="@+id/numberOfReviewsProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="105dp"
-            android:layout_marginTop="320dp"
+            android:layout_below="@+id/statusProduct"
+            android:layout_marginStart="101dp"
+            android:layout_marginTop="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="10dp"
             android:text="TextView" />
