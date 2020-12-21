@@ -1,5 +1,7 @@
 package com.example.hoff.adapter;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import java.util.List;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     List<Product> modelList;
+    SharedPreferences preferences;
 
     public MyAdapter( List<Product> modelList ) {
         this.modelList=modelList;
@@ -32,6 +35,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
         View view =LayoutInflater.from ( parent.getContext () ).inflate ( R.layout.item_layout, parent, false );
         ViewHolder vh = new ViewHolder ( view );
+        if(preferences == null){
+            preferences =parent.getContext ().getSharedPreferences ( "NICE", Context.MODE_PRIVATE );
+        }
         return vh;
     }
 
@@ -55,6 +61,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         TextView statusProduct;
         RatingBar ratingBarProduct;
         TextView numberOfReviewsProduct;
+        ImageView imageLike;
+        boolean like;
+        Product currentProduct;
 
 
         public ViewHolder( @NonNull View itemView ) {
@@ -68,9 +77,30 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             statusProduct = itemView.findViewById ( R.id.statusProduct );
             ratingBarProduct = itemView.findViewById ( R.id.ratingBarProduct );
             numberOfReviewsProduct = itemView.findViewById ( R.id.numberOfReviewsProduct );
+            imageLike = itemView.findViewById ( R.id.imageLike );
+
+            // Происходит клик, если иконка закрашена, то убери раскраску
+            // Иначе закрась
+            // И сохрани состояние иконки
+            imageLike.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick( View v ) {
+                    if(preferences.getBoolean ( currentProduct.getId (), false )){
+                        imageLike.setImageResource ( R.drawable.ic_unlike );
+                        saveData ( currentProduct.getId (), false );
+                    }else {
+                        imageLike.setImageResource ( R.drawable.ic_like );
+                        saveData ( currentProduct.getId (), true );
+                    }
+                }
+            } );
+
         }
 
         public void bind( Product product ){
+            currentProduct = product;
+            // При закреплении элементов идет проверка на состояние иконки: закрашена или не закрашена
+            like = preferences.getBoolean ( currentProduct.getId (), true );
 
             // Image set
             String imageUrl = product.getImage();
@@ -96,7 +126,21 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             //rating bar set stars
             ratingBarProduct.setRating ( product.getRating () );
 
-
+            // Как только заходим на активити все иконки пустые
+            // Если до этого мы заходили и закрашивали иконки, то присвой им их состояние
+            if(preferences.getBoolean ( currentProduct.getId (), false )){
+                imageLike.setImageResource ( R.drawable.ic_like );
+            }else {
+                imageLike.setImageResource ( R.drawable.ic_unlike );
+            }
         }
     }
+
+    // Метод, сохоаняющий состояние иконки
+    public void saveData(String id, boolean dataToSave){
+        SharedPreferences.Editor editor = preferences.edit ();
+        editor.putBoolean ( id, dataToSave );
+        editor.apply ();
+    }
+
 }
